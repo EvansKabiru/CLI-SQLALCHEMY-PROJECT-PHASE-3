@@ -1,193 +1,281 @@
 from config import *
+from models import Income, Expense, FinancialGoal, FinancialInstitution, User, Category, UserInstitution
+import os
 
-
-
-# Functions for my CRUD Operations
-def add_technical_instructor():
-    name = input("Enter Instructor Name: ")
-    email = input("Enter Instructor Email: ")
-    instructor = TechnicalInstructor(name=name, email=email)
-    session.add(instructor)
+def close_session():
     session.commit()
-    print("Instructor added successfully.")
+    session.close()
 
-def view_technical_instructors():
-    instructors = session.query(TechnicalInstructor).all()
-    for instructor in instructors:
-        print(f"{instructor.id} - {instructor.name} - {instructor.email}")
+# ==================== CRUD Operations for Income ====================
+def add_income():
+    amount = float(input("Enter income amount: "))
+    source = input("Enter income source: ")
+    income = Income(amount=amount, source=source)
+    session.add(income)
+    close_session()
+    print("Income Added!")
 
-def update_technical_instructor():
-    instructor_id = int(input("Enter Instructor ID to update: "))
-    instructor = session.query(TechnicalInstructor).filter_by(id=instructor_id).first()
-    if instructor:
-        instructor.name = input(f"Enter new name (current: {instructor.name}): ")
-        instructor.email = input(f"Enter new email (current: {instructor.email}): ")
-        session.commit()
-        print("Instructor updated successfully.")
+def view_incomes():
+    incomes = session.query(Income).all()
+    if not incomes:
+        print("No incomes found.")
     else:
-        print("Instructor not found.")
+        for income in incomes:
+            print(f"ID: {income.id}, Amount: {income.amount}, Source: {income.source}")
 
-def delete_technical_instructor():
-    instructor_id = int(input("Enter Instructor ID to delete: "))
-    instructor = session.query(TechnicalInstructor).filter_by(id=instructor_id).first()
-    if instructor:
-        session.delete(instructor)
-        session.commit()
-        print("Instructor deleted successfully.")
+def update_income():
+    income_id = int(input("Enter Income ID to update: "))
+    income = session.query(Income).filter_by(id=income_id).first()
+    if income:
+        income.amount = float(input(f"Enter new amount (Current: {income.amount}): ") or income.amount)
+        income.source = input(f"Enter new source (Current: {income.source}): ") or income.source
+        close_session()
+        print("Income updated!")
     else:
-        print("Instructor not found.")
+        print("Income not found.")
 
-# ====================COURSE=========================
-def add_course():
-    title = input("Enter Course Title: ")
-    instructor_id = int(input("Enter Instructor ID: "))
-    course = Course(title=title, instructor_id=instructor_id)
-    session.add(course)
+def delete_income():
+    income_id = int(input("Enter Income ID to delete: "))
+    income = session.query(Income).filter_by(id=income_id).first()
+    if income:
+        session.delete(income)
+        close_session()
+        print("Income deleted!")
+    else:
+        print("Income not found.")
+
+# ==================== CRUD Operations for Expenses ====================
+def add_expense():
+    amount = float(input("Enter expense amount: "))
+    category_id = input("Enter expense category: ")
+    income_id = input("Enter expense income:")
+    expense = Expense(amount=amount, category_id=category_id, income_id=income_id)
+    session.add(expense)
+    close_session()
+    print("Expense Added!")
+
+def view_expenses():
+    expenses = session.query(Expense).all()
+    if not expenses:
+        print("No expenses found.")
+    else:
+        for expense in expenses:
+            print(f"ID: {expense.id}, Amount: {expense.amount}, Category_id: {expense.category_id}, Income_id: {expense.income_id}")
+
+def update_expense():
+    expense_id = int(input("Enter Expense ID to update: "))
+    expense = session.query(Expense).filter_by(id=expense_id).first()
+    if expense:
+        expense.amount = float(input(f"Enter new amount (Current: {expense.amount}): ") or expense.amount)
+        expense.category_id = (input(f"Enter new category (Current: {expense.category_id}): ") or expense.category_id)
+        expense.income_id = (input(f"Enter new category (Current: {expense.income_id}): ") or expense.income_id)
+        close_session()
+        print("Expense updated!")
+    else:
+        print("Expense not found.")
+
+def delete_expense():
+    expense_id = int(input("Enter Expense ID to delete: "))
+    expense = session.query(Expense).filter_by(id=expense_id).first()
+    if expense:
+        session.delete(expense)
+        close_session()
+        print("Expense deleted!")
+    else:
+        print("Expense not found.")
+
+# ==================== CRUD Operations for Savings Goals ====================
+def add_savings_goal():
+    target_amount = float(input("Enter savings goal amount: "))
+    
+    goal = FinancialGoal(target_amount=target_amount)
+    session.add(goal)
+    close_session()
+    print("Savings goal added!")
+
+def view_savings_goals():
+    goals = session.query(FinancialGoal).all()
+    if not goals:
+        print("No savings goals found.")
+    else:
+        for goal in goals:
+            print(f"ID: {goal.id}, Target_Amount: {goal.target_amount}")
+
+def update_savings_goal():
+    goal_id = int(input("Enter Savings Goal ID to update: "))
+    goal = session.query(FinancialGoal).filter_by(id=goal_id).first()
+    if goal:
+        goal.target_amount = float(input(f"Enter new amount (Current: {goal.target_amount}): ") or goal.target_amount)
+        
+        close_session()
+        print("Savings goal updated!")
+    else:
+        print("Savings goal not found.")
+
+def delete_savings_goal():
+    goal_id = int(input("Enter Savings Goal ID to delete: "))
+    goal = session.query(FinancialGoal).filter_by(id=goal_id).first()
+    if goal:
+        session.delete(goal)
+        close_session()
+        print("Savings goal deleted!")
+    else:
+        print("Savings goal not found.")
+
+# CRUD Operations for Financial Institutions
+def add_financial_institution():
+    os.system('clear')
+    print("Add a Financial Institution")
+    name = input("Enter the name of the financial institution: ")
+    account_type = input("Enter the account type (e.g., Savings, Checking): ")
+
+    institution = FinancialInstitution(name=name, account_type=account_type)
+    session.add(institution)
     session.commit()
-    print("Course added successfully.")
 
-def view_courses():
-    courses = session.query(Course).all()
-    for course in courses:
-        print(f"{course.id} - {course.title} - Instructor ID: {course.instructor_id}")
+    print(f"Financial Institution '{name}' added successfully!")
 
-def update_course():
-    course_id = int(input("Enter Course ID to update: "))
-    course = session.query(Course).filter_by(id=course_id).first()
-    if course:
-        course.title = input(f"Enter new title (current: {course.title}): ")
-        session.commit()
-        print("Course updated successfully.")
+def view_financial_institutions():
+    os.system('clear')
+    print("Financial Institutions")
+    institutions = session.query(FinancialInstitution).all()
+
+    if not institutions:
+        print("No financial institutions found.")
     else:
-        print("Course not found.")
+        for institution in institutions:
+            print(f"ID: {institution.id}, Name: {institution.name}, Account Type: {institution.account_type}")
 
-def delete_course():
-    course_id = int(input("Enter Course ID to delete: "))
-    course = session.query(Course).filter_by(id=course_id).first()
-    if course:
-        session.delete(course)
-        session.commit()
-        print("Course deleted successfully.")
-    else:
-        print("Course not found.")
+def update_financial_institution():
+    os.system('clear')
+    print("Update Financial Institution")
+    view_financial_institutions()
 
+    institution_id = input("Enter the ID of the financial institution to update: ")
+    institution = session.query(FinancialInstitution).get(institution_id)
 
-# ====================STUDENT=========================
-def add_student():
-    name = input("Enter Student Name: ")
-    email = input("Enter Student Email: ")
-    course_id = input("Enter the Course ID: ")
-    student = Student(name=name, email=email, course_id=course_id)
-    session.add(student)
+    if not institution:
+        print("Financial Institution not found.")
+        return
+
+    institution.name = input(f"Enter new name (current: {institution.name}): ") or institution.name
+    institution.account_type = input(f"Enter new account type (current: {institution.account_type}): ") or institution.account_type
     session.commit()
-    print("Student added successfully.")
 
-def view_students():
-    students = session.query(Student).all()
-    for student in students:
-        print(f"{student.id} - {student.name} - {student.email} - {student.course_id}")
+    print(f"Financial Institution '{institution.name}' updated successfully!")
 
-def update_student():
-    student_id = int(input("Enter Student ID to update: "))
-    student = session.query(Student).filter_by(id=student_id).first()
-    if student:
-        student.name = input(f"Enter new name (current: {student.name}): ")
-        student.email = input(f"Enter new email (current: {student.email}): ")
-        student.course_id = input(f"Enter new Course ID (current: {student.course_id}): ")
-        session.commit()
-        print("Student updated successfully.")
-    else:
-        print("Student not found.")
+def delete_financial_institution():
+    os.system('clear')
+    print("Delete Financial Institution")
+    view_financial_institutions()
 
-def delete_student():
-    student_id = int(input("Enter Student ID to delete: "))
-    student = session.query(Student).filter_by(id=student_id).first()
-    if student:
-        session.delete(student)
-        session.commit()
-        print("Student deleted successfully.")
-    else:
-        print("Student not found.")
+    institution_id = input("Enter the ID of the financial institution to delete: ")
+    institution = session.query(FinancialInstitution).get(institution_id)
 
+    if not institution:
+        print("Financial Institution not found.")
+        return
 
+    session.delete(institution)
+    session.commit()
 
-# ======================= Main CLI App ============================
+    print(f"Financial Institution '{institution.name}' deleted successfully!")
+
+# ========================== Main CLI Application ============================
 def main():
+    
     while True:
         os.system('clear')
-        print("Welcome to Tech School")
-        print("1. Manage Technical Instructors")
-        print("2. Manage Courses")
-        print("3. Manage Students")
+        print("Welcome to Personal Finance Dashboard")
+        print("1. Manage Income")
+        print("2. Manage Expenses")
+        print("3. Manage Savings Goals")
+        print("4. Manage Financial Institutions")
         main_menu_choice = input("Enter your Choice: ")
 
         if main_menu_choice == '1':
             while True:
                 os.system('clear')
-                print("1. Add Instructor")
-                print("2. View Instructors")
-                print("3. Update Instructor")
-                print("4. Delete Instructor")
+                print("1. Add Income")
+                print("2. View Incomes")
+                print("3. Update Income")
+                print("4. Delete Income")
                 print("5. Back to Main Menu")
-                instructor_menu_choice = input("Enter your Choice: ")
-                if instructor_menu_choice == '1':
-                    add_technical_instructor()
-                elif instructor_menu_choice == '2':
-                    view_technical_instructors()
-                elif instructor_menu_choice == '3':
-                    update_technical_instructor()
-                elif instructor_menu_choice == '4':
-                    delete_technical_instructor()
-                elif instructor_menu_choice == '5':
+                income_menu_choice = input("Enter your Choice: ")
+                if income_menu_choice == '1':
+                    add_income()
+                elif income_menu_choice == '2':
+                    view_incomes()
+                elif income_menu_choice == '3':
+                    update_income()
+                elif income_menu_choice == '4':
+                    delete_income()
+                elif income_menu_choice == '5':
                     break
                 input("Press Enter to continue...")
-        
+
         elif main_menu_choice == '2':
             while True:
                 os.system('clear')
-                print("1. Add Course")
-                print("2. View Courses")
-                print("3. Update Course")
-                print("4. Delete Course")
+                print("1. Add Expense")
+                print("2. View Expenses")
+                print("3. Update Expense")
+                print("4. Delete Expense")
                 print("5. Back to Main Menu")
-                course_menu_choice = input("Enter your Choice: ")
-                if course_menu_choice == '1':
-                    add_course()
-                elif course_menu_choice == '2':
-                    view_courses()
-                elif course_menu_choice == '3':
-                    update_course()
-                elif course_menu_choice == '4':
-                    delete_course()
-                elif course_menu_choice == '5':
+                expense_menu_choice = input("Enter your Choice: ")
+                if expense_menu_choice == '1':
+                    add_expense()
+                elif expense_menu_choice == '2':
+                    view_expenses()
+                elif expense_menu_choice == '3':
+                    update_expense()
+                elif expense_menu_choice == '4':
+                    delete_expense()
+                elif expense_menu_choice == '5':
                     break
                 input("Press Enter to continue...")
-        
+
         elif main_menu_choice == '3':
             while True:
                 os.system('clear')
-                print("1. Add Student")
-                print("2. View Students")
-                print("3. Update Student")
-                print("4. Delete Student")
+                print("1. Add Savings Goal")
+                print("2. View Savings Goals")
+                print("3. Update Savings Goal")
+                print("4. Delete Savings Goal")
                 print("5. Back to Main Menu")
-                student_menu_choice = input("Enter your Choice: ")
-                if student_menu_choice == '1':
-                    add_student()
-                elif student_menu_choice == '2':
-                    view_students()
-                elif student_menu_choice == '3':
-                    update_student()
-                elif student_menu_choice == '4':
-                    delete_student()
-                elif student_menu_choice == '5':
+                goal_menu_choice = input("Enter your Choice: ")
+                if goal_menu_choice == '1':
+                    add_savings_goal()
+                elif goal_menu_choice == '2':
+                    view_savings_goals()
+                elif goal_menu_choice == '3':
+                    update_savings_goal()
+                elif goal_menu_choice == '4':
+                    delete_savings_goal()
+                elif goal_menu_choice == '5':
                     break
                 input("Press Enter to continue...")
 
-        else:
-            print("Invalid choice! Please choose again.")
-            input("Press Enter to continue...")
+        elif main_menu_choice == '4':
+            while True:
+                os.system('clear')
+                print("1. Add Financial Institution")
+                print("2. View Financial Institutions")
+                print("3. Update Financial Institution")
+                print("4. Delete Financial Institution")
+                print("5. Back to Main Menu")
+                institution_menu_choice = input("Enter your Choice: ")
+                if institution_menu_choice == '1':
+                    add_financial_institution()
+                elif institution_menu_choice == '2':
+                    view_financial_institutions()
+                elif institution_menu_choice == '3':
+                    update_financial_institution()
+                elif institution_menu_choice == '4':
+                    delete_financial_institution()
+                elif institution_menu_choice == '5':
+                    break
+                input("Press Enter to continue...")
 
-
-# Call the main function
-main()
+if __name__ == "__main__":
+    main()

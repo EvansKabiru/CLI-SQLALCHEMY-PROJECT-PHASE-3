@@ -1,49 +1,97 @@
-from sqlalchemy import Column, Text, Integer,String, Boolean,ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm  import declarative_base, relationship
-from datetime import datetime
+
 
 Base = declarative_base()
 
-class TechnicalInstructor(Base):
-    __tablename__ = "technical_instructors"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+# User Table
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    password = Column(String)
+
+    # One-to-Many Relationship: One user can have multiple incomes
+    incomes = relationship("Income", back_populates="user")
     
-    # One-to-many relationship: One TechnicalInstructor can have many Courses
-    courses = relationship("Course", back_populates="instructor")
-
-# Define the Student model
-class Student(Base):
-    __tablename__ = "students"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    # The foreign key to relate to the Course
-    course_id = Column(Integer, ForeignKey('courses.id'), nullable=True)
-
-    # Each Student can have many Courses - (assuming direct enrollment in courses)
-    courses = relationship("Course", back_populates="students")
-
-
-# Define the Course model
-class Course(Base):
-    __tablename__ = "courses"
-    id = Column(Integer, primary_key=True)
-    title = Column(String(200), nullable=False)
-    instructor_id = Column(Integer, ForeignKey('technical_instructors.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    # One-to-Many Relationship: One user can have multiple financial goals
+    financial_goals = relationship("FinancialGoal", back_populates="user")
     
-    # Define the relationship with TechnicalInstructor
-    instructor = relationship("TechnicalInstructor", back_populates="courses")
+    # Many-to-Many Relationship: A user can have multiple financial institutions
+    financial_institutions = relationship("FinancialInstitution", secondary="user_institution", back_populates="users")
+
+
+# Income Table
+class Income(Base):
+    __tablename__ = 'incomes'
+
+    id = Column(Integer, primary_key=True, index=True)
+    amount = Column(Float)
+    source = Column(String)
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+    # One-to-Many Relationship: Income can have multiple expenses
+    expenses = relationship("Expense", back_populates="income")
     
-    # Each Course can have many Students
-    students = relationship("Student", back_populates="courses")
+    user = relationship("User", back_populates="incomes")
 
 
+# Expense Table
+class Expense(Base):
+    __tablename__ = 'expenses'
 
-# The relationship here
-# 1 - many => TechnicalInstructor - Course
-# 1 - many => Student - Course
+    id = Column(Integer, primary_key=True, index=True)
+    amount = Column(Float)
+    category_id = Column(Integer, ForeignKey('categories.id'))
+    income_id = Column(Integer, ForeignKey('incomes.id'))
+
+    # One-to-Many Relationship: Expense belongs to a single category
+    category = relationship("Category", back_populates="expenses")
+    
+    # One-to-Many Relationship: Expense belongs to a single income
+    income = relationship("Income", back_populates="expenses")
+
+
+# Financial Goal Table
+class FinancialGoal(Base):
+    __tablename__ = 'financial_goals'
+
+    id = Column(Integer, primary_key=True, index=True)
+    target_amount = Column(Float)
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+    # One-to-Many Relationship: Goal is tied to a user
+    user = relationship("User", back_populates="financial_goals")
+
+
+# Category Table
+class Category(Base):
+    __tablename__ = 'categories'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True)
+
+    # One-to-Many Relationship: Category can have many expenses
+    expenses = relationship("Expense", back_populates="category")
+
+
+# Financial Institution Table
+class FinancialInstitution(Base):
+    __tablename__ = 'financial_institutions'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    account_type = Column(String)
+
+    # Many-to-Many Relationship: A financial institution can serve multiple users
+    users = relationship("User", secondary="user_institution", back_populates="financial_institutions")
+
+
+# Many-to-Many Relationship Table: User and FinancialInstitution association
+class UserInstitution(Base):
+    __tablename__ = 'user_institution'
+
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    institution_id = Column(Integer, ForeignKey('financial_institutions.id'), primary_key=True)
