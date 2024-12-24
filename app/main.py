@@ -1,5 +1,5 @@
 from config import *
-from models import Income, Expense, FinancialGoal, FinancialInstitution, User, Category, UserInstitution
+from models import Income, Expense, FinancialGoal, FinancialInstitution
 import os
 
 def close_session():
@@ -181,6 +181,8 @@ def delete_financial_institution():
 
     print(f"Financial Institution '{institution.name}' deleted successfully!")
 
+   
+
 # ========================== Main CLI Application ============================
 def main():
     
@@ -191,6 +193,7 @@ def main():
         print("2. Manage Expenses")
         print("3. Manage Savings Goals")
         print("4. Manage Financial Institutions")
+    
         main_menu_choice = input("Enter your Choice: ")
 
         if main_menu_choice == '1':
@@ -276,6 +279,8 @@ def main():
                 elif institution_menu_choice == '5':
                     break
                 input("Press Enter to continue...")
+
+        
 
 if __name__ == "__main__":
     main()

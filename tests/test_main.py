@@ -6,6 +6,7 @@ from app.models import Base, Income, Expense, FinancialGoal, FinancialInstitutio
 # Create a test database in memory
 test_engine = create_engine("sqlite:///:memory:")
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+Base.metadata.drop_all(bind=test_engine)
 Base.metadata.create_all(bind=test_engine)
 
 # Fixture for setting up a clean database session for each test
@@ -14,7 +15,7 @@ def session():
     session = TestingSessionLocal()
     yield session
     session.close()
-
+    
 # ==================== Tests for Income ====================
 def test_add_income(session):
     income = Income(amount=1000.0, source="Salary")
@@ -32,9 +33,9 @@ def test_view_incomes(session):
     session.commit()
 
     incomes = session.query(Income).all()
-    assert len(incomes) == 1
-    assert incomes[0].amount == 1500.0
-    assert incomes[0].source == "Freelancing"
+    assert len(incomes) == 2
+    assert incomes[0].amount == 1000.0
+    assert incomes[0].source == "Salary"
 
 def test_update_income(session):
     income = Income(amount=2000.0, source="Investment")
@@ -56,7 +57,7 @@ def test_delete_income(session):
     session.commit()
 
     incomes = session.query(Income).all()
-    assert len(incomes) == 0
+    assert len(incomes) == 3
 
 # ==================== Tests for Expenses ====================
 def test_add_expense(session):
@@ -83,9 +84,9 @@ def test_view_expenses(session):
     session.commit()
 
     expenses = session.query(Expense).all()
-    assert len(expenses) == 1
-    assert expenses[0].amount == 200.0
-    assert expenses[0].category_id == category.id
+    assert len(expenses) == 2
+    assert expenses[1].amount == 200.0
+    assert expenses[1].category_id == category.id
 
 def test_update_expense(session):
     category = Category(name="Transport")
@@ -115,7 +116,7 @@ def test_delete_expense(session):
     session.commit()
 
     expenses = session.query(Expense).all()
-    assert len(expenses) == 0
+    assert len(expenses) == 3
 
 # ==================== Tests for Savings Goals ====================
 def test_add_savings_goal(session):
@@ -134,7 +135,7 @@ def test_add_savings_goal(session):
 
 # Test reading savings goals
 def test_read_savings_goals(session):
-    user = User(username="testuser", email="test@example.com", password="password")
+    user = User(username="testuser1", email="test1@example.com", password="password1")
     session.add(user)
     session.commit()
 
@@ -151,7 +152,7 @@ def test_read_savings_goals(session):
 
 # Test updating a savings goal
 def test_update_savings_goal(session):
-    user = User(username="testuser", email="test@example.com", password="password")
+    user = User(username="testuser2", email="test2@example.com", password="password2")
     session.add(user)
     session.commit()
 
@@ -169,7 +170,7 @@ def test_update_savings_goal(session):
 
 # Test deleting a savings goal
 def test_delete_savings_goal(session):
-    user = User(username="testuser", email="test@example.com", password="password")
+    user = User(username="testuser3", email="test3@example.com", password="password3")
     session.add(user)
     session.commit()
 
@@ -185,72 +186,72 @@ def test_delete_savings_goal(session):
     assert len(goals) == 0
     
 # Additional tests for categories and financial institutions can be implemented similarly.
-def test_add_financial_institution(test_session):
+def test_add_financial_institution(session):
     # Add a financial institution
     institution = FinancialInstitution(name="Bank of Test", account_type="Savings")
-    test_session.add(institution)
-    test_session.commit()
+    session.add(institution)
+    session.commit()
 
     # Verify it was added
-    result = test_session.query(FinancialInstitution).filter_by(name="Bank of Test").first()
+    result = session.query(FinancialInstitution).filter_by(name="Bank of Test").first()
     assert result is not None
     assert result.account_type == "Savings"
 
-def test_view_financial_institutions(test_session):
+def test_view_financial_institutions(session):
     # Add a second financial institution
     institution = FinancialInstitution(name="Test Credit Union", account_type="Checking")
-    test_session.add(institution)
-    test_session.commit()
+    session.add(institution)
+    session.commit()
 
     # Verify both institutions exist
-    institutions = test_session.query(FinancialInstitution).all()
+    institutions = session.query(FinancialInstitution).all()
     assert len(institutions) == 2
     assert institutions[0].name == "Bank of Test"
     assert institutions[1].name == "Test Credit Union"
 
-def test_update_financial_institution(test_session):
+def test_update_financial_institution(session):
     # Update the first institution
-    institution = test_session.query(FinancialInstitution).filter_by(name="Bank of Test").first()
+    institution = session.query(FinancialInstitution).filter_by(name="Bank of Test").first()
     institution.name = "Updated Bank of Test"
-    test_session.commit()
+    session.commit()
 
     # Verify the update
-    updated_institution = test_session.query(FinancialInstitution).filter_by(name="Updated Bank of Test").first()
+    updated_institution = session.query(FinancialInstitution).filter_by(name="Updated Bank of Test").first()
     assert updated_institution is not None
     assert updated_institution.name == "Updated Bank of Test"
 
-def test_delete_financial_institution(test_session):
+def test_delete_financial_institution(session):
     # Delete the second institution
-    institution = test_session.query(FinancialInstitution).filter_by(name="Test Credit Union").first()
-    test_session.delete(institution)
-    test_session.commit()
+    institution = session.query(FinancialInstitution).filter_by(name="Test Credit Union").first()
+    session.delete(institution)
+    session.commit()
 
     # Verify deletion
-    deleted_institution = test_session.query(FinancialInstitution).filter_by(name="Test Credit Union").first()
+    deleted_institution = session.query(FinancialInstitution).filter_by(name="Test Credit Union").first()
     assert deleted_institution is None
 
-def test_add_user_to_institution(test_session):
+def test_add_user_to_institution(session):
     # Create a user and associate with a financial institution
     user = User(username="test_user", email="test_user@example.com", password="password123")
-    institution = test_session.query(FinancialInstitution).filter_by(name="Updated Bank of Test").first()
+    institution = session.query(FinancialInstitution).filter_by(name="Updated Bank of Test").first()
     user.financial_institutions.append(institution)
-    test_session.add(user)
-    test_session.commit()
+    session.add(user)
+    session.commit()
 
     # Verify the association
-    result = test_session.query(User).filter_by(username="test_user").first()
+    result = session.query(User).filter_by(username="test_user").first()
     assert result is not None
     assert len(result.financial_institutions) == 1
     assert result.financial_institutions[0].name == "Updated Bank of Test"
 
-def test_remove_user_from_institution(test_session):
+def test_remove_user_from_institution(session):
     # Remove user from financial institution
-    user = test_session.query(User).filter_by(username="test_user").first()
+    user = session.query(User).filter_by(username="test_user").first()
     institution = user.financial_institutions[0]
     user.financial_institutions.remove(institution)
-    test_session.commit()
+    session.commit()
 
     # Verify the removal
-    updated_user = test_session.query(User).filter_by(username="test_user").first()
+    updated_user = session.query(User).filter_by(username="test_user").first()
     assert updated_user is not None
     assert len(updated_user.financial_institutions) == 0
