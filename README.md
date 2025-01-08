@@ -1,4 +1,5 @@
-# Links:(Google Slides Presentation) https://docs.google.com/presentation/d/1AmtnxYljBivZqMialxoPqcF1i0c_Atr1tSksulSP95k/edit#slide=id.g2d7215db24f_0_72
+# Links:(Google Slides Presentation)
+https://docs.google.com/presentation/d/1HgumGMy5f_h-UbU4__ycTeseYZpT4LAGXSc8U57UA6w/edit#slide=id.ge9090756a_1_300
 #       (Video Presentation link on how the app works) https://youtu.be/rIyHv5JGW-A
 # Personal Finance Dashboard
 
